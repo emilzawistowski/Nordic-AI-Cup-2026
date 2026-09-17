@@ -3,8 +3,7 @@ import random
 from src.core import SimulationCore
 from src.utils.controllers.dummy_agent_policy import action_decision
 
-def local_simulation(verbose=True):
-    seed = None
+def local_simulation(verbose=True, seed=None):
     if seed is None: # If no seed is provided, generate a random one
         seed = random.randint(0, 2**32 - 1)
 
