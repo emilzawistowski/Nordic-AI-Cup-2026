@@ -29,7 +29,6 @@ from dtos import (
     RequestedViewDto,
 )
 from utils import clip_bbox_to_frame, decode_view, view_bbox_to_global
-from drone_detector import detect_objects
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ def predict(request: DroneFlybyPredictRequestDto) -> DroneFlybyPredictResponseDt
     # Never let a modelling error cost you the frame. An empty list still
     # scores the frame; an exception loses it and every detection in it.
     try:
-        annotations = detect_objects(image, request)
+        annotations = detect(image, request)
     except Exception:
         logger.exception('Detector failed on frame %s', request.frame)
         annotations = []

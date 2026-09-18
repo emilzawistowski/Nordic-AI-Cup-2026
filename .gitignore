@@ -31,3 +31,10 @@ medical-appointment/transcripts/
 medical-appointment/*.log
 medical-appointment/test_one_medical.py
 medical-appointment/test_one_medical.py
+
+# Drone local training artifacts
+.vscode/
+drone-flyby/datasets/
+runs/
+drone-flyby/yolo11n.pt
+drone-flyby/*.log
