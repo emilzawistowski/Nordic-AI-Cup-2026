@@ -17,6 +17,7 @@ from fastapi import FastAPI
 
 from dtos import DroneFlybyPredictRequestDto, DroneFlybyPredictResponseDto
 from example import predict
+from drone_detector import warmup_model
 from utils import validate_response
 
 HOST = '0.0.0.0'
@@ -26,6 +27,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def warmup_detector_on_startup():
+    warmup_model()
 start_time = time.time()
 
 
