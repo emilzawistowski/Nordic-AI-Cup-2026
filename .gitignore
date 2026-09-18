@@ -29,3 +29,5 @@ secrets.json
 # Medical local artifacts
 medical-appointment/transcripts/
 medical-appointment/*.log
+medical-appointment/test_one_medical.py
+medical-appointment/test_one_medical.py
