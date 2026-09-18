@@ -88,3 +88,20 @@ def detect_objects(image, request):
         )
 
     return annotations
+
+
+def warmup_model():
+    import numpy as np
+
+    model = get_model()
+    dummy_image = np.zeros((540, 960, 3), dtype=np.uint8)
+
+    model.predict(
+        source=dummy_image,
+        imgsz=960,
+        conf=0.05,
+        iou=0.55,
+        max_det=100,
+        device="mps",
+        verbose=False,
+    )
