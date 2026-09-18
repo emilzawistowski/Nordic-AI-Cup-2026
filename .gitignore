@@ -25,3 +25,7 @@ secrets.json
 # Runtime outputs
 *.log
 *.baseline
+
+# Medical local artifacts
+medical-appointment/transcripts/
+medical-appointment/*.log
