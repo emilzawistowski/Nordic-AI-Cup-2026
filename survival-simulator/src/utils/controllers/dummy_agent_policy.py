@@ -183,6 +183,30 @@ def action_decision(
         # Small scanning motion. Large turns are unnecessarily expensive.
         turn_angle = 0.035 * math.sin(age * 0.08 + phase)
 
+    # Controlled reproduction:
+    # - only in a safe environment,
+    # - only with a large energy reserve,
+    # - only during a short deterministic time window.
+    #
+    # The parent pays 100 energy and the child starts with 75 energy.
+    # A narrow window prevents repeated spawn attempts on every tick.
+    reproduction_threshold = max(
+        0.88 * max_energy,
+        100.0 + 0.55 * max_energy,
+    )
+
+    reproduction_phase = (age + agent_id * 7.3) % 45.0
+
+    if (
+        not predators
+        and energy >= reproduction_threshold
+        and age >= 20.0
+        and reproduction_phase < 0.11
+    ):
+        spawn_agent = True
+        move_distance = min(move_distance, speed * 0.25)
+        turn_angle = 0.0
+
     return ActionRequest(
         agent_id=agent_id,
         move_distance=float(max(0.0, move_distance)),
