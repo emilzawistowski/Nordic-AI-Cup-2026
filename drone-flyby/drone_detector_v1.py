@@ -6,7 +6,7 @@ from dtos import DroneFlybyPredictionDto
 from utils import clip_bbox_to_frame, view_bbox_to_global
 
 
-MODEL_PATH = Path(__file__).parent / "models" / "drone_yolo_v1.pt"
+MODEL_PATH = Path(__file__).parent / "models" / "drone_yolo_v1_validated.pt"
 
 _model = None
 
