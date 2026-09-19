@@ -1,7 +1,7 @@
 import random
 from fastapi import FastAPI, Body
 from src.utils.DTOs import StepResponse
-from src.utils.controllers.dummy_agent_policy import action_decision
+from src.utils.controllers.survival_policy_v11 import action_decision
 
 HOST = "0.0.0.0"
 PORT = 9052
@@ -13,9 +13,9 @@ def predict(step: StepResponse = Body(...)):
     """
     Receives the current simulation state and returns actions for all agents.
     """
-    rng = random.Random(1)  # deterministic for testing
+    rng = random.Random(1)  # deterministic seed per step
     actions = [action_decision(agent.model_dump(), rng).model_dump() for agent in step.agent_status]
-    
+
     # Must return {"actions": [...]} format
     return {"actions": actions}
 

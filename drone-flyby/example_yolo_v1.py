@@ -48,6 +48,15 @@ def predict(request: DroneFlybyPredictRequestDto) -> DroneFlybyPredictResponseDt
             feedback.reason,
         )
 
+    logger.info(
+        "camera frame=%s level=%s center=(%s,%s) region=%s",
+        request.frame,
+        request.view.resolution_level,
+        request.view.center_x,
+        request.view.center_y,
+        request.view.source_region_xyxy,
+    )
+
     image = decode_view(request.view)
 
     # Never let a modelling error cost you the frame. An empty list still

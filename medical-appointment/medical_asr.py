@@ -1,12 +1,9 @@
 import tempfile
 import time
 from pathlib import Path
-
 import mlx_whisper
 
-
 WHISPER_MODEL = "mlx-community/whisper-large-v3-turbo"
-
 
 def transcribe_audio(audio_bytes, audio_filename):
     suffix = Path(audio_filename).suffix or ".mp3"
@@ -40,17 +37,13 @@ def transcribe_audio(audio_bytes, audio_filename):
         if temporary_path is not None:
             temporary_path.unlink(missing_ok=True)
 
-
 def extract_words(transcription):
     words = []
-
     for segment in transcription.get("segments", []):
         for word in segment.get("words", []):
             text = str(word.get("word", "")).strip()
-
             if not text:
                 continue
-
             words.append(
                 {
                     "word": text,
@@ -58,5 +51,4 @@ def extract_words(transcription):
                     "end": float(word["end"]),
                 }
             )
-
     return words

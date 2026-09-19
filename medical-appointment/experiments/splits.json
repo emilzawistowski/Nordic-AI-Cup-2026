@@ -1,0 +1,55 @@
+{
+  "seed": 42,
+  "num_folds": 5,
+  "folds": {
+    "fold_0": [
+      "conversation_sample_64.mp3",
+      "conversation_sample_86.mp3",
+      "conversation_sample_69.mp3",
+      "conversation_sample_84.mp3",
+      "conversation_sample_90.mp3",
+      "conversation_sample_81.mp3",
+      "conversation_sample_54.mp3",
+      "conversation_sample_48.mp3"
+    ],
+    "fold_1": [
+      "conversation_sample_82.mp3",
+      "conversation_sample_71.mp3",
+      "conversation_sample_57.mp3",
+      "conversation_sample_66.mp3",
+      "conversation_sample_70.mp3",
+      "conversation_sample_6.mp3",
+      "conversation_sample_18.mp3",
+      "conversation_sample_52.mp3"
+    ],
+    "fold_2": [
+      "conversation_sample_10.mp3",
+      "conversation_sample_77.mp3",
+      "conversation_sample_42.mp3",
+      "conversation_sample_75.mp3",
+      "conversation_sample_55.mp3",
+      "conversation_sample_4.mp3",
+      "conversation_sample_19.mp3",
+      "conversation_sample_5.mp3"
+    ],
+    "fold_3": [
+      "conversation_sample_39.mp3",
+      "conversation_sample_79.mp3",
+      "conversation_sample_17.mp3",
+      "conversation_sample_56.mp3",
+      "conversation_sample_50.mp3",
+      "conversation_sample_92.mp3",
+      "conversation_sample_23.mp3",
+      "conversation_sample_20.mp3"
+    ],
+    "fold_4": [
+      "conversation_sample_37.mp3",
+      "conversation_sample_63.mp3",
+      "conversation_sample_33.mp3",
+      "conversation_sample_67.mp3",
+      "conversation_sample_95.mp3",
+      "conversation_sample_43.mp3",
+      "conversation_sample_47.mp3"
+    ]
+  }
+}

@@ -4,12 +4,10 @@ import time
 from dtos import ASRQuestionResponseDto
 from medical_asr import extract_words, transcribe_audio
 from medical_evidence import locate_evidence
-from medical_reasoner import answer_question
+from medical_reasoner import answer_questions_batch
 from utils import audio_duration_seconds, decode_audio
 
-
 logger = logging.getLogger(__name__)
-
 
 def predict(request):
     started = time.perf_counter()
@@ -38,39 +36,21 @@ def predict(request):
         evidence_start = []
         evidence_end = []
 
-        for question in request.questions:
-            try:
-                answer, evidence_text = answer_question(
-                    transcript,
-                    question,
-                )
+        # Structured batch generation of all 10 questions at once
+        qa_results = answer_questions_batch(transcript, request.questions)
 
-                span = None
+        for idx, (answer, evidence_text) in enumerate(qa_results):
+            span = None
+            if answer and evidence_text:
+                span = locate_evidence(words, evidence_text)
 
-                if answer and evidence_text:
-                    span = locate_evidence(
-                        words,
-                        evidence_text,
-                    )
-
-                answers.append(bool(answer))
-
-                if span is None:
-                    evidence_start.append(None)
-                    evidence_end.append(None)
-                else:
-                    evidence_start.append(float(span[0]))
-                    evidence_end.append(float(span[1]))
-
-            except Exception:
-                logger.exception(
-                    "Question failed: %s",
-                    question,
-                )
-
-                answers.append(False)
+            answers.append(bool(answer))
+            if span is None:
                 evidence_start.append(None)
                 evidence_end.append(None)
+            else:
+                evidence_start.append(float(span[0]))
+                evidence_end.append(float(span[1]))
 
         logger.info(
             "Completed %s in %.2f seconds",

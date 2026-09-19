@@ -30,6 +30,7 @@ from dtos import (
 )
 from utils import clip_bbox_to_frame, decode_view, view_bbox_to_global
 from drone_detector import detect_objects
+from drone_camera_safe import choose_next_view_safe
 from drone_camera_v2 import choose_next_view_v2
 
 logger = logging.getLogger(__name__)
