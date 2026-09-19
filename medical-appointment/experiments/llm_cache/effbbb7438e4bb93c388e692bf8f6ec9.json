@@ -1,0 +1,42 @@
+[
+  [
+    true,
+    "That was quick. It usually is. Now I would like to sit with you a moment. Are you noticing anything at all? No. Nothing, I think. Nothing at the injection site? Nothing else you have noticed since? No. I am not sure I feel anything at all, really. Good. Then I can say that there were no side effects today. That is a relief. When I say side effects, I mean any unwanted reaction to the vaccine itself. There were none. Right. I understand. Is that clear so far? Or would you like me to go over any of it again? No. I think it is clear. Then let me summarize. You came for your annual influenza vaccination. It was given as planned, and there were no side effects. Okay. As for what comes next, nothing further is needed. No extra measures from my side. So I just go home? Exactly. Nothing more follows from today's visit. Good. Take care, Karen. Thank you, Dr. Reese. Goodbye."
+  ],
+  [
+    true,
+    "I will give the injection now. Say if anything feels uncomfortable. Okay. There. That is the vaccination given. Exactly as planned for this season. That was quick. It usually is."
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    true,
+    "As for what comes next, nothing further is needed. No extra measures from my side. So I just go home? Exactly. Nothing more follows from today's visit."
+  ],
+  [
+    true,
+    "You came for your annual influenza vaccination. It was given as planned, and there were no side effects."
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    true,
+    "So I just go home? Exactly. Nothing more follows from today's visit."
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    true,
+    "When I say side effects, I mean any unwanted reaction to the vaccine itself. There were none. Right. I understand. Is that clear so far? Or would you like me to go over any of it again? No. I think it is clear. Then let me summarize. You came for your annual influenza vaccination. It was given as planned, and there were no side effects. Okay. As for what comes next, nothing further is needed. No extra measures from my side. So I just go home? Exactly. Nothing more follows from today's visit. Good. Take care, Karen. Thank you, Dr. Reese. Goodbye."
+  ],
+  [
+    false,
+    ""
+  ]
+]

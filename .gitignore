@@ -42,3 +42,4 @@ drone-flyby/*.log
 # Ignore evaluation and experiment logs
 *.log
 _work/
+.aider*

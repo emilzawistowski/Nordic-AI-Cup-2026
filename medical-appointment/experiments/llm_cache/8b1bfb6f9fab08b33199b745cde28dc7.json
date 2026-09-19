@@ -1,0 +1,42 @@
+[
+  [
+    true,
+    "I am starting you on penicillin treatment. Penicillin. Starting from today? Yes. From today."
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    true,
+    "The doctor observed a whitish layer sitting on the surface of the tonsils, which is described as a coating."
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    true,
+    "The patient states: \"My throat. It is really sore and it hurts when I swallow."
+  ],
+  [
+    false,
+    ""
+  ]
+]

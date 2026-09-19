@@ -1,0 +1,42 @@
+[
+  [
+    true,
+    "It means we should monitor your blood pressure and your kidney function. That is the sensible step."
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    true,
+    "I need my ibumetin renewed."
+  ],
+  [
+    true,
+    "The prescription is created."
+  ],
+  [
+    true,
+    "And you are still taking pantoprazole alongside it? Yes, every day with it."
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    true,
+    "We check kidneys, cholesterol, and blood sugar."
+  ],
+  [
+    true,
+    "You have used anti-inflammatory painkillers heavily and for a long time."
+  ],
+  [
+    true,
+    "I would like you to measure your blood pressure at home over three days."
+  ]
+]

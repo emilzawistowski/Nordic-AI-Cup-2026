@@ -1,0 +1,42 @@
+[
+  [
+    true,
+    "A sore throat."
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    true,
+    "There was no pus."
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    true,
+    "It was negative."
+  ],
+  [
+    true,
+    "My assessment is that this is a viral infection."
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    false,
+    ""
+  ],
+  [
+    true,
+    "The doctor has decided against antibiotics."
+  ],
+  [
+    false,
+    ""
+  ]
+]
