@@ -5,9 +5,9 @@ mAP-based (COCO mAP@0.50 on hidden validation frames).
 Score depends on: correct class labels + tight bounding boxes + camera steering.
 
 ## Production status — 2026-09-19
-Current `example.py` uses V5 adaptive camera + V4 tracker + unchanged V2 detector weights.
-Best reported online validation: **V4 0.0111**, zero errors; V5 online is pending.
-Leader score reported by the user: **0.908**. Step 3 is held until the V5 online number.
+Current `example.py` is restored from `example_v4_backup.py`: V4 tracker + original horizontal camera + unchanged V2 detector weights.
+Best reported online validation: **V4 0.0111**, zero errors. V5 **0.0091** regressed and was reverted.
+Leader score reported by the user: **0.908**. Step 3 and further experiments are held pending the user's next direction.
 
 ## Attempt log
 | # | Date | Local mAP | Online score | Model | What changed |
@@ -59,3 +59,15 @@ the previous V2 online baseline as 0.0075; older attempt records remain unchange
 - `api.py`, `dtos.py`, `local_evaluator.py`, `utils.py`, `visualize.py`, and both V1/V2 model weights verified unchanged by SHA-256. Unrelated main-tree medical work preserved and excluded from the promotion commit.
 - V5 online validation **PENDING**. Restart the existing production API to load the updated `example.py` before submitting its endpoint. Online comparison target is now **>0.0111**, and competition target **>0.908**.
 - **Do not start roadmap step 3 or another experiment until the user provides the V5 online number.**
+
+
+## 2026-09-19 — V5 online 0.0091 vs V4 0.0111 — REVERTED
+
+- Online validation reported by the user: V5 **0.0091**, V4 **0.0111**; V5 regressed approximately **18.0%** despite the local increase from 0.168 to 0.219. V5 also produced a reported camera-limit error absent from V4's online run. The combined V5 pipeline failed the online keep gate.
+- **Decision: REVERT V5 / KEEP V4.** Restored main-tree `drone-flyby/example.py` byte-for-byte from `example_v4_backup.py`. V5 reference files (`example_drone_v5.py` and `drone_camera_v5.py`) are retained unchanged. There is no `example_v5.py` in this checkout; the existing versioned entry point is `example_drone_v5.py`.
+- Required safety note, as reported/instructed by the user: **"V5 camera bypassed L2 551px safe-move limit. Any future camera change MUST route through the same safety wrapper used by V4."**
+- Code-provenance qualification: V4 currently imports `choose_next_view` from `example_v2_backup.py`, whose horizontal step uses 0.9 times the supplied movement limit. It does not import `drone_camera_safe.py`. V5 uses separate inline distance checks against the supplied limit. The triggering online request/command was not supplied, so the exact failure mechanism has not been independently reproduced. This records the incident and mandatory future shared-safety requirement without claiming a verified root cause. No safety code was changed in this rollback.
+- Restored V4 final realtime check through unchanged `api.py` on temporary port 9056: **COCO mAP@0.50 0.168**, accepted 25/25, skipped 0, unanswered 0, timeouts 0, HTTP errors 0, invalid responses 0, refused moves 0. Round trip mean/median/max **66/60/218 ms**.
+- Protected framework files, V5 reference files, V4 backup, and V1/V2 model weights verified unchanged by SHA-256. No files deleted. Unrelated work excluded from the commit.
+- Temporary verification API stopped after testing; existing production processes were not restarted. Restart the production API to load restored V4 before its next use.
+- **Do NOT start roadmap step 3 or any new experiment. Wait for the user's next direction.**
