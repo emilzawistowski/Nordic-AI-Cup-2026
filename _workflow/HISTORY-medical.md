@@ -103,3 +103,16 @@ LLM with a question-anchored sentence-run shrink, not with prompt pleading.
 `Accuracy: 0.974, Mean tIoU: 0.487, Score: 0.682` (380/390, 0 failed, 0
 timeouts; per conversation 10915 ms mean, 17826 ms worst — 30% of the 60s
 budget; prompt's 25s/45s requirement holds). Matches benchmark.py exactly.
+
+## Attempt 4 (2026-09-19) — index-based evidence (v2/v3) — REVERTED, score 0.649
+| # | Date | Score | Accuracy | tIoU | What changed |
+|---|------|-------|----------|------|--------------|
+| 4 | 2026-09-19 | 0.649 | 0.967 | 0.438 | LLM cites sentence IDs from numbered transcript (`medical_reasoner_v2.py`), deterministic ID->timestamp lookup, no fuzzy match/shift (`medical_evidence_v3.py`), served via `api_v3.py:9055` |
+
+HTTP end-to-end (local_evaluator.py --url, 39 convs, 0 failed, 0 timeouts,
+9220 ms mean / 15832 ms worst per conv): 377/390 correct; positive recall
+188/195; invalid sentence IDs 0/390; no stage failures. Score 0.649 < 0.6822
+gate → all v2/v3/api_v3 files removed, example.py untouched. Learning: the
+LLM picks roughly the right sentences (0 invalid IDs) but single-sentence
+spans under-cover gold (~3.2s ≈ 2 sentences) while losing the +0.3s start
+bias and question-anchored run selection; index lookup alone is not enough.
