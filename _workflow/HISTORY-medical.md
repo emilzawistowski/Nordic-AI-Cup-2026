@@ -116,3 +116,17 @@ gate → all v2/v3/api_v3 files removed, example.py untouched. Learning: the
 LLM picks roughly the right sentences (0 invalid IDs) but single-sentence
 spans under-cover gold (~3.2s ≈ 2 sentences) while losing the +0.3s start
 bias and question-anchored run selection; index lookup alone is not enough.
+
+## Attempt 5 (2026-09-19) — hybrid ID+shrink (v2/v4) — PASS 0.710, NOT promoted
+| # | Date | Score | Accuracy | tIoU | What changed |
+|---|------|-------|----------|------|--------------|
+| 5 | 2026-09-19 | 0.710 | 0.967 | 0.539 | Keep ID anchoring, add back shrink: F1 sub-run selection within cited sentences + 0.3s start shift (`medical_evidence_v4.py`), served via `api_v4.py:9056` |
+
+HTTP end-to-end (local_evaluator.py --url, 39 convs, 0 failed, 0 timeouts,
+9078 ms mean / 16056 ms worst per conv): 377/390 correct; positive recall
+188/195; invalid sentence IDs 0; SHRINK_FALLBACK 21 (full cited range used:
+no sub-run with F1 > 0 or degenerate geometry); 0 stage failures. Score
+0.710 > 0.6822 gate → PASS but NOT promoted to example.py (awaiting
+go-ahead). Diagnosis confirmed: attempt 4 failed on missing shrink, not on
+ID anchoring. Note: accuracy 0.967 < 0.9744 (7 false-no on positives: the
+ID prompt answers marginally more conservatively), but 0.6 tIoU weight wins.
