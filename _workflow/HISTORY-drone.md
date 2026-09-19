@@ -4,9 +4,10 @@
 mAP-based (COCO mAP@0.50 on hidden validation frames).
 Score depends on: correct class labels + tight bounding boxes + camera steering.
 
-## CRITICAL: Best online score uses single-stage V1, NOT current example.py!
-Current example.py runs two-stage V3 which scores 3x WORSE online.
-Best example: example_drone_best.py → copy to example.py before submitting.
+## Production status — 2026-09-19
+Current `example.py` uses V5 adaptive camera + V4 tracker + unchanged V2 detector weights.
+Best reported online validation: **V4 0.0111**, zero errors; V5 online is pending.
+Leader score reported by the user: **0.908**. Step 3 is held until the V5 online number.
 
 ## Attempt log
 | # | Date | Local mAP | Online score | Model | What changed |
@@ -17,7 +18,10 @@ Best example: example_drone_best.py → copy to example.py before submitting.
 | 3 | 2026-09-19 | 0.090 | NOT SUBMITTED | two-stage V3 + safe camera | Local better, online not tested yet |
 | 4 | 2026-09-19 | 0.075 (was 0.069 V1) | NOT SUBMITTED | drone_yolo_v2_augmented.pt | Direction A: YOLO11n single-stage retrained on copy-paste diversified set (500 syn tiles, 60% zero-AP oversample); example.py now points at drone_detector_v2.py; fixed train script save-path bug (weights were in runs/detect/runs/detect/) |
 
-## BEST ONLINE: Attempt #1 (single-stage V1, score 0.007506)
+## BEST ONLINE: V4, score 0.0111 (user-reported 2026-09-19)
+
+Historical verified V1 score: 0.007506. The latest user report separately identifies
+the previous V2 online baseline as 0.0075; older attempt records remain unchanged.
 
 ## Dead ends
 - Two-stage pipeline: better local mAP but much worse online generalization
@@ -38,3 +42,20 @@ Best example: example_drone_best.py → copy to example.py before submitting.
 ---
 *Append new attempts below this line*
 - Attempt #4 detail: V1 baseline re-verified (realtime 0.069 = logged 0.069; direct 0.0687). V2 realtime 0.075, direct 0.0755 — repeatable +0.006 gain (helicopter 0.109→0.158, small_plane 0→0.059; hangar/medium_plane/mine_roller still 0). Tile-level probe @conf0.25: V2 prec 0.776/rec 0.963 vs V1 0.679/0.981; detections stable under color-shift+flip. Generalization note: expected to generalize slightly BETTER than the bare +0.006 suggests (augmentation targets scene-overfit: new backgrounds/scales/lighting), BUT pastes are same-scene crops with visible seams and train-val mAP50 was 0.926 (tight scene fit), so online gain may be smaller than local — submit to verify; V1 checkpoint untouched (SHA 05d1506d) as fallback.
+
+
+## V4 online verification — 2026-09-19
+
+- User-reported V4 online validation: **0.0111**, zero errors, versus user-reported V2 **0.0075** (approximately +48% using rounded values; user reports +47%). **KEEP**. This is evidence of positive tracker transfer on this validation sequence.
+- Worktree attempt #5 local V4 mAP: 0.1683168317, realtime 0.168. Worktree attempt #6 V5 local mAP: 0.2191766052, realtime 0.219. Those results preceded this main-tree promotion; no new experiment was started here.
+
+## 2026-09-19 — promoted v5 to production — local mAP 0.219 — KEEP
+
+- Copied files from the isolated worktree into the main repo working tree; no branch merge or cherry-pick. Copied `drone_camera_v5.py`, `example_drone_v5.py`, and their required unchanged `drone_tracker_v4.py` dependency.
+- Main `example.py` now exports the V5 pipeline's predictor; detector remains `models/drone_yolo_v2_augmented.pt` (SHA-256 `4c98a7d9f21e34bc879df3636c003878a5e028732065cb885f82a6191dd13c22`).
+- Observed checkout discrepancy: main-tree `example.py` was still V2, byte-identical to the saved V2 source, not V4. Preserved that exact file as `example_v2_backup.py` before overwriting. Saved the verified worktree V4 production entry point byte-for-byte as `example_v4_backup.py`; it uses the copied V2 backup's unchanged camera policy. No existing backup was overwritten.
+- Final test used the main-tree, unmodified `api.py`, served on temporary port 9056, and unmodified `local_evaluator.py --url http://127.0.0.1:9056/predict --realtime --verbose`.
+- Result: **COCO mAP@0.50 0.219; KEEP**. Frames accepted 25/25; skipped 0; unanswered 0; timeouts 0; HTTP errors 0; invalid responses 0; refused moves 0. Round trip mean/median/max 90/83/326 ms. Temporary verification server stopped after testing; existing production server processes were not restarted.
+- `api.py`, `dtos.py`, `local_evaluator.py`, `utils.py`, `visualize.py`, and both V1/V2 model weights verified unchanged by SHA-256. Unrelated main-tree medical work preserved and excluded from the promotion commit.
+- V5 online validation **PENDING**. Restart the existing production API to load the updated `example.py` before submitting its endpoint. Online comparison target is now **>0.0111**, and competition target **>0.908**.
+- **Do not start roadmap step 3 or another experiment until the user provides the V5 online number.**
