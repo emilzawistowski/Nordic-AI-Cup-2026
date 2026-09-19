@@ -1,31 +1,41 @@
+"""Production entry point — hybrid ID + shrink pipeline (attempt 5, promoted).
+
+Pipeline: MLX Whisper-large-v3-turbo ASR (word timestamps) ->
+Qwen3-4B indexed QA over numbered sentences (medical_reasoner_v2) ->
+deterministic ID->timestamp lookup + F1 sub-run shrink + 0.3s start shift
+(medical_evidence_v4).
+
+Score 0.710 (acc 0.967, tIoU 0.539) end-to-end via local_evaluator.py.
+Previous pipeline (fuzzy match + spans_v2, score 0.6822) kept in
+example_v3_backup.py.
+"""
+
 import logging
 import time
 
 from dtos import ASRQuestionResponseDto
 from medical_asr import extract_words, transcribe_audio
-from medical_evidence import locate_evidence
-from medical_reasoner import answer_questions_batch
-from medical_spans_v2 import (
-    build_sentence_runs,
-    calibrate_span,
+from medical_evidence_v4 import (
+    build_numbered_transcript,
+    build_sentences,
+    calibrate_indexed_span,
     content_tokens,
-    retrieval_span,
 )
+from medical_reasoner_v2 import answer_questions_batch_indexed
 from utils import audio_duration_seconds, decode_audio
 
 logger = logging.getLogger(__name__)
 
-# Phase 3 hardening: load + exercise models at import (no warm-up period;
-# the first request is the slowest). Failures here must not break import.
+# Model preload at import (no warm-up period; the first request is slowest).
+# Failures here must not break import.
 try:
-    from medical_reasoner import get_model as _get_reasoning_model
+    from medical_reasoner_v2 import get_model as _get_reasoning_model
 
     _model, _tokenizer = _get_reasoning_model()
-    logger.info("Reasoning model preloaded at import")
+    logger.info("Reasoning model (v2) preloaded at import")
 except Exception:
     logger.exception("Reasoning model preload failed (will retry per request)")
 
-_FALLBACK_YES_THRESHOLD = 0.3
 
 def predict(request):
     started = time.perf_counter()
@@ -46,7 +56,6 @@ def predict(request):
             audio_bytes,
             request.audio_filename,
         )
-        transcript = transcription.get("text", "").strip()
         words = extract_words(transcription)
     except Exception:
         logger.exception(
@@ -60,16 +69,16 @@ def predict(request):
         )
 
     try:
-        runs = build_sentence_runs(words)
+        sentences = build_sentences(words)
     except Exception:
-        logger.exception("Sentence-run build failed for %s", request.audio_filename)
-        runs = []
+        logger.exception("Sentence build failed for %s", request.audio_filename)
+        sentences = []
 
-    # LLM stage isolated: a failure after successful ASR still returns
-    # retrieval-based answers/spans instead of all-False.
+    numbered = build_numbered_transcript(sentences)
+
+    # LLM stage isolated: a failure after successful ASR returns all-False.
     try:
-        # Structured batch generation of all 10 questions at once
-        qa_results = answer_questions_batch(transcript, request.questions)
+        qa_results = answer_questions_batch_indexed(numbered, request.questions)
         if qa_results is None or len(qa_results) != count:
             raise ValueError(
                 f"LLM returned {0 if qa_results is None else len(qa_results)} "
@@ -77,65 +86,53 @@ def predict(request):
             )
     except Exception:
         logger.exception(
-            "LLM stage failed for %s, using retrieval fallback",
+            "LLM stage failed for %s",
             request.audio_filename,
         )
-        qa_results = None
+        return ASRQuestionResponseDto(
+            answers=[False] * count,
+            evidence_start=[None] * count,
+            evidence_end=[None] * count,
+        )
 
     try:
         answers = []
         evidence_start = []
         evidence_end = []
 
-        if qa_results is None:
-            from medical_spans_v2 import _f1 as _run_f1
-
-            for question in request.questions:
-                question_tokens = content_tokens(question)
-                best_score = -1.0
-                best_run = None
-                for run in runs:
-                    score = _run_f1(question_tokens, run["tokens"])
-                    if score > best_score:
-                        best_score = score
-                        best_run = run
-                answer = bool(best_run is not None and best_score > _FALLBACK_YES_THRESHOLD)
-                answers.append(answer)
-                span = None
-                if answer and best_run is not None:
-                    span = retrieval_span(runs, question_tokens)
+        for idx, (answer, ids) in enumerate(qa_results):
+            span = None
+            final_answer = bool(answer)
+            if final_answer:
+                question_tokens = content_tokens(request.questions[idx])
+                span, fell_back = calibrate_indexed_span(
+                    sentences, ids, question_tokens
+                )
                 if span is None:
-                    evidence_start.append(None)
-                    evidence_end.append(None)
-                else:
-                    evidence_start.append(float(span[0]))
-                    evidence_end.append(float(span[1]))
-        else:
-            for idx, (answer, evidence_text) in enumerate(qa_results):
-                span = None
-                try:
-                    question_tokens = content_tokens(request.questions[idx])
-                    if answer and evidence_text:
-                        raw = locate_evidence(words, evidence_text)
-                        span = calibrate_span(raw, runs, question_tokens)
-                        if span is None:
-                            # YES never yields None: retrieval fallback
-                            span = retrieval_span(runs, question_tokens)
-                except Exception:
-                    logger.exception(
-                        "Span stage failed for %s q%d",
+                    logger.warning(
+                        "INVALID_SENTENCE_ID %s q%d: ids=%r out of range "
+                        "(n_sent=%d) -> treated as NO",
                         request.audio_filename,
                         idx,
+                        ids,
+                        len(sentences),
                     )
-                    span = None
+                    final_answer = False
+                elif fell_back:
+                    logger.info(
+                        "SHRINK_FALLBACK %s q%d: ids=%r full cited range used",
+                        request.audio_filename,
+                        idx,
+                        ids,
+                    )
 
-                answers.append(bool(answer))
-                if span is None:
-                    evidence_start.append(None)
-                    evidence_end.append(None)
-                else:
-                    evidence_start.append(float(span[0]))
-                    evidence_end.append(float(span[1]))
+            answers.append(final_answer)
+            if span is None:
+                evidence_start.append(None)
+                evidence_end.append(None)
+            else:
+                evidence_start.append(float(span[0]))
+                evidence_end.append(float(span[1]))
 
         logger.info(
             "Completed %s in %.2f seconds",

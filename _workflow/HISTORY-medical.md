@@ -130,3 +130,12 @@ no sub-run with F1 > 0 or degenerate geometry); 0 stage failures. Score
 go-ahead). Diagnosis confirmed: attempt 4 failed on missing shrink, not on
 ID anchoring. Note: accuracy 0.967 < 0.9744 (7 false-no on positives: the
 ID prompt answers marginally more conservatively), but 0.6 tIoU weight wins.
+
+## Promotion (2026-09-19) — promoted v4 (hybrid ID+shrink) to production, KEEP 0.710
+Previous example.py (fuzzy+spans_v2, 0.6822) backed up as
+`medical-appointment/example_v3_backup.py` (verified byte-identical to git
+HEAD). example.py now imports medical_reasoner_v2 + medical_evidence_v4.
+Confirmation run via production api.py:9054 — Accuracy 0.967, Mean tIoU
+0.539, Score 0.710 (identical to attempt 5 pre-promotion run). Old files
+(medical_reasoner.py, medical_evidence.py, api_v4.py, example_medical_v4.py)
+kept as reference. Current best: 0.710.
