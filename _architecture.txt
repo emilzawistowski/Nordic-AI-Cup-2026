@@ -1,0 +1,164 @@
+############################################################
+# NORDIC AI CUP 2026 — ARCHITECTURE SNAPSHOT
+# Generated: 2026-09-19T12:10 CEST
+# Branch: winning-solution
+############################################################
+
+=== GIT LOG (last 10) ===
+a2db2e9  checkpoint: all work before architecture review
+9bbe76b  medical-appointment: final, score 0.6394
+4fba6e4  docs: record best Drone Flyby validation checkpoint
+d0aac96  feat: add deterministic drone detector v3
+1a8eb07  checkpoint: preserve validated Drone Flyby model v1
+
+############################################################
+# USE CASE 1: medical-appointment
+############################################################
+
+SCORE (local evaluator):
+  Accuracy:  0.974  (380/390 correct)
+  Mean tIoU: 0.416  (over 195 annotated yes-questions)
+  Score:     0.6394
+  Latency:   10271 ms mean, 17270 ms worst (budget 60000 ms)
+
+APPROACH:
+  1. Transcribe audio once with MLX Whisper (whisper-large-v3-turbo), word-level timestamps.
+  2. Batch all 10 questions into one structured Qwen3-4B-Instruct-2507-4bit call.
+  3. Locate evidence in word timeline with SequenceMatcher + guarded numeric/negation alignment.
+
+ENTRY POINT: api.py → example.py → predict()
+
+KEY FILES:
+  example.py           Main predict() pipeline
+  medical_asr.py       Whisper transcription + word extraction
+  medical_reasoner.py  Qwen3-4B batch QA
+  medical_evidence.py  locate_evidence() - exact match then fuzzy with numeric/negation guard
+  fact_verifier.py     Hard-negative pre-filter (NOT currently active in pipeline)
+  api.py               DO NOT MODIFY
+  dtos.py              DO NOT MODIFY
+
+MODELS (HuggingFace cache, no local .pt):
+  mlx-community/whisper-large-v3-turbo
+  mlx-community/Qwen3-4B-Instruct-2507-4bit
+
+DEAD ENDS:
+  1. fact_verifier hard-negative pre-filter: no gain over Qwen3 batching
+  2. Negation-aligned evidence: +0.0024 tIoU, below +0.015 promotion gate
+
+SCORE ANATOMY:
+  Score = 0.5 * Accuracy + 0.5 * Mean_tIoU
+  Accuracy is near-ceiling (0.974). Gain is in tIoU (0.416).
+  tIoU improves by returning shorter, more precise evidence spans.
+
+HIGHEST-IMPACT NEXT IDEAS:
+  A) Second LLM call to re-quote the exact shortest phrase from transcript
+  B) Switch to bigger model (Qwen3-8B or 14B) for better evidence selection
+  C) Use whisper word-confidence to filter uncertain spans
+  D) Use Qwen3 thinking mode (/no_think off) for harder near-miss questions
+
+############################################################
+# USE CASE 2: drone-flyby
+############################################################
+
+SCORE (online validation):
+  Best online score:    0.007506  (model: drone_yolo_v1_validated.pt)
+  Two-stage V3 online:  0.002430  (WORSE despite better local mAP)
+  Local mAP V1:  0.069
+  Local mAP V3:  0.090  (does NOT generalize to hidden validation)
+
+!!! CRITICAL WARNING !!!
+  Current example.py uses the two-stage V3 which scores 3x WORSE online.
+  IMMEDIATELY BEFORE NEXT SUBMISSION: cp example_drone_best.py example.py
+
+APPROACH (current active in example.py — underperforming):
+  Two-stage: objectness YOLO11s → classifier YOLO11s on 224x224 crops
+  Camera: choose_next_view_safe() — horizontal serpentine Level-2
+
+BEST VALIDATED APPROACH (example_drone_best.py / example_yolo_v1.py):
+  Single-stage: drone_yolo_v1_validated.pt (YOLO11n multiclass)
+  Camera: horizontal Level-2 sweep
+
+KEY FILES:
+  example.py              ACTIVE (V3 two-stage — currently losing)
+  example_drone_best.py   BEST ONLINE checkpoint pipeline
+  example_yolo_v1.py      Best single-stage baseline
+  drone_detector.py       Two-stage detector
+  drone_detector_v1.py    Single-stage detector
+  drone_camera_safe.py    Safe serpentine camera
+  api.py                  DO NOT MODIFY
+  dtos.py                 DO NOT MODIFY
+
+MODELS (local .pt files):
+  models/drone_yolo_v1_validated.pt       YOLO11n single-stage — BEST ONLINE (SHA: 05d1506d)
+  models/drone_objectness_yolo11s_v1.pt   YOLO11s objectness (V3 stage 1)
+  models/drone_classifier_yolo11s_v1.pt   YOLO11s classifier (V3 stage 2)
+  yolo11n.pt, yolo11s.pt                  Base weights (training only, ~19-47MB each)
+
+AP@0.50 BY CLASS (V3 local, 25-frame helsinki scene):
+  jet_plane 0.277 | tank 0.208 | condor 0.188 | small_plane 0.119 | helicopter 0.109
+  hangar 0.000 | medium_plane 0.000 | mine_roller 0.000 | small_launcher 0.000
+
+DEAD ENDS:
+  1. Two-stage V3: better local mAP but much worse online (overfits on small dataset)
+  2. Camera with no movement guards → refused moves (618, 619, 697 px)
+
+HIGHEST-IMPACT NEXT IDEAS:
+  A) REVERT example.py to single-stage V1 immediately
+  B) Train V1 with copy-paste augmentation + background replacement for generalization
+  C) Try zero-shot Grounding DINO / OWL-ViT as detector
+  D) Ensemble V1+V3 predictions with NMS
+  E) Fix zero-AP classes (hangar, mine_roller) - not seen in training
+
+############################################################
+# USE CASE 3: survival-simulator
+############################################################
+
+SCORE: No explicit score file. Agent currently uses survival_policy_v11.
+       v50 is the latest experimental policy (NOT deployed).
+
+ENTRY POINT: agent_server.py → action_decision() from survival_policy_v11
+
+APPROACH (v11 — currently active):
+  Rule-based, 4 priority tiers:
+  1. Predator Avoidance: weighted escape, sprint if predator <55 units
+  2. Fruit Harvesting: move to nearest visible fruit
+  3. Tree Foraging: if energy_ratio < 0.85 OR age > 60
+  4. Sine-wave Wandering: phase-offset per agent_id (spreads agents)
+  Reproduction: spawn if energy >= 185 and age >= 10 (no predators)
+
+LATEST EXPERIMENTAL (v50 — untested online):
+  Same as v11 but: energy trigger <0.70 (was <0.85), age threshold >90 (was >60)
+  Goal: prevent tree clustering → reduce predator kills in late game
+
+KEY FILES:
+  agent_server.py                              Entry point (imports v11)
+  src/utils/controllers/survival_policy_v11.py ACTIVE policy
+  src/utils/controllers/survival_policy_v50.py Latest experimental
+  benchmark_any_policy.py                      Local benchmark (10 seeds)
+  simulation_server.py                         DO NOT MODIFY
+
+DEAD ENDS (v3–v50 history):
+  - Aggressive early spawning → starvation
+  - Strict energy conservation → predator deaths
+  - Clustering near trees → easy predator kills
+  - Complex wall-avoidance → marginal benefit, high complexity
+
+HIGHEST-IMPACT NEXT IDEAS:
+  A) Benchmark v50 vs v11 on 10 seeds, deploy winner
+  B) Flee-zone memory: avoid area where predator last seen for N ticks
+  C) Parametric sweep: auto-tune energy_ratio/age/sprint thresholds
+  D) Simple learned policy via local simulator rollouts
+
+############################################################
+# SUBMISSION CHECKLIST
+############################################################
+
+  medical-appointment:  python api.py         (port 9051)
+  drone-flyby:          python api.py         (port 9053)
+  survival-simulator:   python agent_server.py (port 9052)
+
+  ⚠️  DRONE: Roll back example.py before submitting online!
+
+############################################################
+# END OF SNAPSHOT
+############################################################
