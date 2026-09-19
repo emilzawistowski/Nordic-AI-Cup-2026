@@ -178,3 +178,21 @@ and v5 dropped the +0.3s start shift — geometry calibration belongs
 outside the LLM (attempt-3 lesson, confirmed twice now). Note: trim rate
 was not instrumented (only fallbacks logged) — next LLM-geometry attempt
 must log kept-vs-trimmed sentence counts.
+
+## Attempt 8 (2026-09-19) — grid search shrink params — NO IMPROVEMENT, kept as analysis
+| # | Date | In-sample tIoU | Out-of-sample tIoU | Final score |
+|---|------|----------------|--------------------|-------------|
+| 8 | 2026-09-19 | baseline 0.5586, best 0.5586 (+0.0000) | delta -0.0065, 0/5 folds, bootstrap 0.3% | n/a (no online run; gate failed) |
+
+Audited constants (experiments/grid_params_v6.py): ds=0.3, de=0.0,
+F-beta=1.0, max_run=uncapped, tau=0, shift_on_fallback=False. Coarse grid
+720 combos (ds x de x beta x maxrun x tau x shift_fb), nested 5-fold CV on
+fresh cache (experiments/cache_v6.json + llm_cache_v2/; ASR from
+transcripts/, call-1 rebuilt with identical production prompt — attempt-6
+cache was deleted on revert). In-sample argmax over all 720 combos ==
+baseline exactly: v4's hardcoded params are already the optimum of this
+family, so no refine round and no v5 files were warranted. Scripts + cache
+committed for reuse. Learning: the shrink heuristic is fully tuned; left
+only end-trim variants that E1 already rejected and tie-breaks too weak to
+matter. Next gains must come from elsewhere (better cited ranges from the
+LLM, or answer-side accuracy: 7 false-no remain).
