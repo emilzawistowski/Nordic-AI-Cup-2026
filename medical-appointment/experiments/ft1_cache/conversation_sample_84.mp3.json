@@ -1,0 +1,1 @@
+{"raw": "<think>\n\n</think>\n\n1. NO\n2. NO\n3. NO\n4. YES [11]\n5. YES [30,31]\n6. YES [71]\n7. YES [47]\n8. YES [11]\n9. YES [11]\n10. YES [27,28]", "parsed": [[false, []], [false, []], [false, []], [true, [11]], [true, [30, 31]], [true, [71]], [true, [47]], [true, [11]], [true, [11]], [true, [27, 28]]]}

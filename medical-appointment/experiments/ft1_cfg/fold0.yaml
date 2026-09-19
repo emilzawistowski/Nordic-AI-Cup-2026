@@ -1,0 +1,28 @@
+model: mlx-community/Qwen3-4B-Instruct-2507-4bit
+train: true
+fine_tune_type: lora
+optimizer: adamw
+data: experiments/ft1_data/fold0
+adapter_path: models/medft1/fold0
+seed: 42
+num_layers: 16
+batch_size: 1
+iters: 124
+val_batches: 1
+steps_per_report: 5
+steps_per_eval: 100000
+save_every: 124
+learning_rate: 2.0e-5
+max_seq_length: 1792
+mask_prompt: true
+grad_checkpoint: false
+lora_parameters:
+  keys: [self_attn.q_proj, self_attn.k_proj, self_attn.v_proj, self_attn.o_proj, mlp.gate_proj, mlp.up_proj, mlp.down_proj]
+  rank: 16
+  scale: 20.0
+  dropout: 0.05
+lr_schedule:
+  name: cosine_decay
+  warmup: 10
+  warmup_init: 1.0e-7
+  arguments: [2.0e-5, 124, 2.0e-6]

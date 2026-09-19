@@ -196,3 +196,30 @@ committed for reuse. Learning: the shrink heuristic is fully tuned; left
 only end-trim variants that E1 already rejected and tie-breaks too weak to
 matter. Next gains must come from elsewhere (better cited ranges from the
 LLM, or answer-side accuracy: 7 false-no remain).
+
+## Attempt 9 (2026-09-19) — "ft1" LoRA-SFT sentence-run selector — FAILED (early stop 2)
+| # | Date | Pooled OOS (folds 0-1, 16 convs / 160 q) | Verdict |
+|---|------|------------------------------------------|---------|
+| 9 | 2026-09-19 | v4: acc 0.9750 / tIoU 0.6243 / score 0.7646; A: 0.9875 / 0.5925 (-0.0318) / 0.7505; B: 0.9875 / 0.6105 (-0.0138) / 0.7613 | FAILED |
+
+Recipe: P=4, ITERS=124/fold (1 pass, bs=1), LR 2.0e-5 cosine, rank 16,
+16 layers, MAXLEN 1792 (max 1517 toks), mask_prompt=true. s_it=3.89s,
+projected total 3634s (budget 12600s — passed, no P=3 rebuild). Wall clock
+probe->abort approx 34 min.
+Gates: oracle sanity 0.8153 in [0.74,0.83] PASSED (run-length 138/41/16,
+9 targets < 0.3); prompt parity PASSED; MAXLEN PASSED; fold0 parse health
+0 bad PASSED; early stop 2 (folds 0-1 tIoU delta < 0 for both A and B)
+FIRED -> aborted per spec, no retune, `full` never trained.
+Per-fold B: fold_0 tIoU 0.5788 (acc 0.9875), fold_1 tIoU 0.6377 (acc 0.9875).
+Note: SFT improved answers (+2 correct, 158/160) but hurt spans — one pass
+teaches YES/NO patterns, not the annotators' span convention.
+Files created (all kept, none promoted): medical_reasoner_ft1.py,
+medical_evidence_ft1.py, example_ft1.py (POSTPROC placeholder), api_ft1.py,
+experiments/{ft1_common,ft1_build_data,ft1_cv}.py,
+experiments/ft1_data/{fold0..4,full}/, experiments/ft1_cfg/,
+models/medft1/{_probe,fold0,fold1}/ (gitignored, on disk),
+experiments/ft1_cache/ (16 convs), experiments/ft1_results.json,
+experiments/ft1_run.log, ft1_maxlen.txt, ft1_sit.txt. Production v4 untouched.
+Learning (one line): supervision for one pass improves answer accuracy but
+degrades span selection — the span convention needs more than imitated
+oracle IDs at this data scale.

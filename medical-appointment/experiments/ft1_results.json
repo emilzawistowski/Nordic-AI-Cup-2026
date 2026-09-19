@@ -1,0 +1,7 @@
+{
+  "aborted": true,
+  "stage": "after-fold1",
+  "delta_A": -0.031833026068741166,
+  "delta_B": -0.013839455951403679,
+  "baseline_tiou": 0.6243010548214758
+}

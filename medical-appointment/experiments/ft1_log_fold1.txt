@@ -1,0 +1,38 @@
+Loading configuration file experiments/ft1_cfg/fold1.yaml
+Loading pretrained model
+Fetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]Fetching 11 files: 100%|██████████| 11/11 [00:00<00:00, 2809.83it/s]
+Loading datasets
+Training
+Trainable parameters: 0.365% (14.680M/4022.468M)
+Starting training..., iters: 124
+Calculating loss...:   0%|          | 0/1 [00:00<?, ?it/s]Calculating loss...: 100%|██████████| 1/1 [00:01<00:00,  1.43s/it]Calculating loss...: 100%|██████████| 1/1 [00:01<00:00,  1.43s/it]
+Iter 1: Val loss 2.160, Val took 1.438s
+Iter 5: Train loss 2.349, Learning Rate 8.060e-06, It/sec 0.429, Tokens/sec 27.854, Trained Tokens 325, Peak mem 9.734 GB
+Iter 10: Train loss 0.868, Learning Rate 1.801e-05, It/sec 0.468, Tokens/sec 27.510, Trained Tokens 619, Peak mem 9.734 GB
+Iter 15: Train loss 0.552, Learning Rate 1.997e-05, It/sec 0.439, Tokens/sec 30.669, Trained Tokens 968, Peak mem 9.734 GB
+Iter 20: Train loss 0.386, Learning Rate 1.982e-05, It/sec 0.450, Tokens/sec 28.445, Trained Tokens 1284, Peak mem 9.734 GB
+Iter 25: Train loss 0.360, Learning Rate 1.952e-05, It/sec 0.450, Tokens/sec 30.510, Trained Tokens 1623, Peak mem 9.734 GB
+Iter 30: Train loss 0.320, Learning Rate 1.908e-05, It/sec 0.349, Tokens/sec 24.657, Trained Tokens 1976, Peak mem 13.445 GB
+Iter 35: Train loss 0.263, Learning Rate 1.851e-05, It/sec 0.376, Tokens/sec 23.745, Trained Tokens 2292, Peak mem 13.640 GB
+Iter 40: Train loss 0.237, Learning Rate 1.783e-05, It/sec 0.430, Tokens/sec 29.655, Trained Tokens 2637, Peak mem 13.640 GB
+Iter 45: Train loss 0.156, Learning Rate 1.703e-05, It/sec 0.421, Tokens/sec 27.437, Trained Tokens 2963, Peak mem 13.640 GB
+Iter 50: Train loss 0.135, Learning Rate 1.614e-05, It/sec 0.444, Tokens/sec 29.144, Trained Tokens 3291, Peak mem 13.640 GB
+Iter 55: Train loss 0.179, Learning Rate 1.517e-05, It/sec 0.402, Tokens/sec 27.319, Trained Tokens 3631, Peak mem 13.640 GB
+Iter 60: Train loss 0.129, Learning Rate 1.413e-05, It/sec 0.385, Tokens/sec 27.702, Trained Tokens 3991, Peak mem 13.640 GB
+Iter 65: Train loss 0.098, Learning Rate 1.303e-05, It/sec 0.406, Tokens/sec 27.214, Trained Tokens 4326, Peak mem 13.640 GB
+Iter 70: Train loss 0.076, Learning Rate 1.191e-05, It/sec 0.333, Tokens/sec 22.187, Trained Tokens 4659, Peak mem 13.640 GB
+Iter 75: Train loss 0.136, Learning Rate 1.077e-05, It/sec 0.408, Tokens/sec 26.571, Trained Tokens 4985, Peak mem 13.640 GB
+Iter 80: Train loss 0.091, Learning Rate 9.637e-06, It/sec 0.390, Tokens/sec 25.253, Trained Tokens 5309, Peak mem 13.640 GB
+Iter 85: Train loss 0.056, Learning Rate 8.524e-06, It/sec 0.391, Tokens/sec 27.089, Trained Tokens 5655, Peak mem 13.640 GB
+Iter 90: Train loss 0.063, Learning Rate 7.451e-06, It/sec 0.372, Tokens/sec 22.142, Trained Tokens 5953, Peak mem 13.640 GB
+Iter 95: Train loss 0.056, Learning Rate 6.434e-06, It/sec 0.367, Tokens/sec 24.149, Trained Tokens 6282, Peak mem 13.640 GB
+Iter 100: Train loss 0.033, Learning Rate 5.491e-06, It/sec 0.374, Tokens/sec 22.445, Trained Tokens 6582, Peak mem 13.640 GB
+Iter 105: Train loss 0.057, Learning Rate 4.636e-06, It/sec 0.430, Tokens/sec 27.800, Trained Tokens 6905, Peak mem 13.640 GB
+Iter 110: Train loss 0.104, Learning Rate 3.883e-06, It/sec 0.361, Tokens/sec 23.200, Trained Tokens 7226, Peak mem 13.640 GB
+Iter 115: Train loss 0.040, Learning Rate 3.244e-06, It/sec 0.450, Tokens/sec 29.614, Trained Tokens 7555, Peak mem 13.640 GB
+Iter 120: Train loss 0.067, Learning Rate 2.729e-06, It/sec 0.374, Tokens/sec 25.943, Trained Tokens 7902, Peak mem 13.640 GB
+Calculating loss...:   0%|          | 0/1 [00:00<?, ?it/s]Calculating loss...: 100%|██████████| 1/1 [00:01<00:00,  1.36s/it]Calculating loss...: 100%|██████████| 1/1 [00:01<00:00,  1.36s/it]
+Iter 124: Val loss 0.038, Val took 1.384s
+Iter 124: Train loss 0.069, Learning Rate 2.413e-06, It/sec 0.392, Tokens/sec 20.998, Trained Tokens 8170, Peak mem 13.640 GB
+Iter 124: Saved adapter weights to models/medft1/fold1/adapters.safetensors and models/medft1/fold1/0000124_adapters.safetensors.
+Saved final weights to models/medft1/fold1/adapters.safetensors.

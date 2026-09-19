@@ -82,3 +82,7 @@ cython_debug/
 .jupyter
 
 *.log
+
+# Attempt 9 LoRA adapters (kept on disk, never committed)
+models/medft1/fold*/
+models/medft1/_probe/
