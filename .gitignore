@@ -38,3 +38,7 @@ drone-flyby/datasets/
 runs/
 drone-flyby/yolo11n.pt
 drone-flyby/*.log
+
+# Ignore evaluation and experiment logs
+*.log
+_work/

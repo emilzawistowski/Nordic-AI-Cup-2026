@@ -80,3 +80,5 @@ cython_debug/
 .vscode
 .devcontainer
 .jupyter
+
+*.log

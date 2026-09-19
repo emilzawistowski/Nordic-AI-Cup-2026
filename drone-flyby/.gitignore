@@ -79,3 +79,10 @@ cython_debug/
 .vscode
 .devcontainer
 .jupyter
+
+# Base Ultralytics weights (downloaded automatically if missing)
+yolo11n.pt
+yolo11s.pt
+yolo11n-cls.pt
+yolo11s-cls.pt
+*.log
