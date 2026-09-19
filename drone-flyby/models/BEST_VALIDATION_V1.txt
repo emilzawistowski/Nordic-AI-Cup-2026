@@ -1,0 +1,23 @@
+Drone Flyby best online validation checkpoint
+
+Online validation score:
+0.007505635095660476
+
+Queued attempt UUID:
+2593fd809f634defab094b73a9c0d607
+
+Model:
+models/drone_yolo_v1_validated.pt
+
+SHA-256:
+05d1506da89edf612c2556cab0f2274767bef3b3d80e885104f701e5b180b2cb
+
+Pipeline:
+Single-stage YOLO11n multiclass detector
+Horizontal Level-2 camera sweep
+Model warmup enabled
+
+Local realtime score:
+0.069
+
+Do not overwrite this checkpoint.
