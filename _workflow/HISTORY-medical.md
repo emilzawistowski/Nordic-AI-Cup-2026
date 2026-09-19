@@ -139,3 +139,24 @@ Confirmation run via production api.py:9054 — Accuracy 0.967, Mean tIoU
 0.539, Score 0.710 (identical to attempt 5 pre-promotion run). Old files
 (medical_reasoner.py, medical_evidence.py, api_v4.py, example_medical_v4.py)
 kept as reference. Current best: 0.710.
+
+## Attempt 6 (2026-09-19) — word-level boundary regressor — REVERTED (offline gate)
+| # | Date | Score | Accuracy | tIoU | What changed |
+|---|------|-------|----------|------|--------------|
+| 6 | 2026-09-19 | n/a (no online run) | - | offline delta -0.111 | Word-window refinement inside cited range: score=F1+a*mean_prob+b*punct_edge, shifts ds/de, nested 5-fold CV |
+
+Offline protocol (repo gate, same as e1): cached words+prob (transcripts/ has
+per-word probability on all 39 convs) + fresh indexed LLM outputs; grid
+(a,b,ds,de) fit on 4 folds, tested on held-out fold, rotated. Faithfulness:
+v4-on-cache tIoU 0.5386 ≈ production 0.539. Result: train-optimal params
+(0.4,0.25,0.15,0.0) collapsed on every held-out fold — deltas
+-0.07/-0.16/-0.12/-0.07/-0.14, pooled -0.111, 0/5 folds improved, bootstrap
+0%. Even the near-v4 point (pure F1, word windows, ds=0.3) lost by -0.27 on
+all folds. No online local_evaluator run: a change at -0.11 offline (5/5
+folds negative) fails the promotion gate before deserving a GPU eval.
+Scratch files (build_cache_v5.py, e5_gate.py, cache_v5.json, llm_cache_v2/)
+removed; production v4 untouched. Learning (load-bearing): sentence
+granularity is the regularizer — F1-argmax over word windows collapses to
+tiny high-precision windows while gold ≈ 2 sentences. Any future boundary
+work must keep candidates at sentence edges (select only start/end
+sentences, or expand-only), never free word windows.
