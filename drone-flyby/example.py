@@ -30,8 +30,6 @@ from dtos import (
 )
 from utils import clip_bbox_to_frame, decode_view, view_bbox_to_global
 from drone_detector import detect_objects
-from drone_camera_safe import choose_next_view_safe
-from drone_camera_v2 import choose_next_view_v2
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +72,7 @@ def predict(request: DroneFlybyPredictRequestDto) -> DroneFlybyPredictResponseDt
         request_id=request.request_id,
         frame=request.frame,
         annotations=annotations,
-        requested_view=choose_next_view_v2(request),
+        requested_view=choose_next_view(request),
     )
 
 
@@ -162,16 +160,15 @@ def detect(
 _sweep_direction: Dict[str, int] = {}
 
 
-def choose_next_view(request):
+def choose_next_view(
+    request: DroneFlybyPredictRequestDto,
+) -> Optional[RequestedViewDto]:
     """Sweep sideways at the deepest zoom the camera can reach right now.
 
     Everything here is read from ``request.camera_constraints`` rather than
     hardcoded, which is the whole trick: honour the constraints you are handed
     and your commands cannot be rejected. Return ``None`` to hold position.
     """
-    if request.frame_index == 0:
-        _sweep_direction.pop(request.sequence_id, None)
-
     constraints = request.camera_constraints
     current = request.view
     allowed = [level for level in constraints.allowed_resolution_levels if level > 0]
@@ -194,7 +191,7 @@ def choose_next_view(request):
             center_y=int(centre_y),
         )
 
-    direction = _sweep_direction.setdefault(request.sequence_id, -1)
+    direction = _sweep_direction.setdefault(request.sequence_id, 1)
 
     # Move as far as this response is allowed to, and no further. The limit
     # belongs to the level the camera is on now, not the one we are going to.
