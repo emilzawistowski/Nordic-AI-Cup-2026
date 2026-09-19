@@ -1,0 +1,400 @@
+=== v12 ===
+<     Angles are relative to agent heading.
+>     Angles are relative to current agent heading.
+<         weight = 6000.0 / (distance * distance + 1.0)
+>         weight = 8000.0 / (distance * distance + 1.0)
+> def get_best_fruit(fruits: list[dict]) -> dict:
+>     """Select fruit maximizing energy / (distance + 5.0)."""
+>     return max(
+>         fruits,
+
+=== v13 ===
+<         weight = 6000.0 / (distance * distance + 1.0)
+>         weight = 10000.0 / (distance * distance + 1.0)
+> def get_best_fruit(fruits: list[dict]) -> dict:
+>     return max(
+>         fruits,
+>         key=lambda f: float(f.get("energy", 50.0)) / (float(f["distance"]) + 5.0)
+>     )
+> 
+
+=== v14 ===
+< def weighted_escape_direction(predators: list[dict]) -> float:
+> def inverse_cubic_escape_direction(predators: list[dict]) -> float:
+<     Calculate weighted escape direction away from all observed predators.
+>     Calculate inverse-cubic weighted escape direction away from all observed predators.
+<         weight = 6000.0 / (distance * distance + 1.0)
+>         weight = 50000.0 / (distance * distance * distance + 10.0)
+> 
+> def get_best_fruit(fruits: list[dict]) -> dict:
+
+=== v15 ===
+<         weight = 6000.0 / (distance * distance + 1.0)
+>         weight = 10000.0 / (distance * distance + 1.0)
+> def get_tree_cluster_centroid(trees: list[dict]) -> tuple[float, float, float]:
+>     """
+>     Calculate centroid angle, average distance, and count of visible tree cluster.
+>     """
+>     if not trees:
+>         return 0.0, 0.0, 0
+
+=== v16 ===
+<     """
+<     Calculate weighted escape direction away from all observed predators.
+<     Angles are relative to agent heading.
+<     """
+<         weight = 6000.0 / (distance * distance + 1.0)
+>         weight = 12000.0 / (distance * distance + 1.0)
+< def nearest_observation(observations: list[dict], object_type: str):
+<     candidates = [
+
+=== v17 ===
+<     """
+<     Calculate weighted escape direction away from all observed predators.
+<     Angles are relative to agent heading.
+<     """
+<         weight = 6000.0 / (distance * distance + 1.0)
+>         weight = 12000.0 / (distance * distance + 1.0)
+< def nearest_observation(observations: list[dict], object_type: str):
+<     candidates = [
+
+=== v18 ===
+> """
+> survival_policy_v18.py — "Face the Predator" Strategy
+> 
+> Key insight from predator.py line 37:
+>   When abs(agent_looking_dir) <= pi/2 → predator PIVOTS (moves sideways, slow)
+>   When abs(agent_looking_dir) > pi/2  → predator CHARGES (full sprint directly at us)
+> 
+>   agent_looking_dir (predator's view) = arctan2(pred.y-agent.y, pred.x-agent.x) - agent.direction
+
+=== v19 ===
+> """
+> survival_policy_v19.py — "Face + Kite + Aggressive Spawn"
+> 
+> Same face-the-predator exploit as v18, but with:
+> - Lower spawn threshold (155 energy) for faster population growth early on
+> - More agents = predators split attention between them
+> - Biome-awareness: don't sprint in swamp (0.5x movement penalty wastes energy)
+> - Better sprint control: only sprint when truly necessary
+
+=== v20 ===
+> """
+> survival_policy_v20.py — "Phase-Based Adaptive Survival & Trait Exploitation"
+> 
+> Key Insights & Improvements over v11:
+> 1. PHASE-BASED REPRODUCTION:
+>    - Early Game (t < 400s, few predators): Spawn at lower threshold (165 energy) to quickly establish a population buffer.
+>    - Late Game (t >= 400s, many predators): Increase threshold to 195 energy to preserve parent stamina and prevent parent starvation.
+> 
+
+=== v21 ===
+> """
+> survival_policy_v21.py — "v11 Champion + Enhanced Escape Radius & Tree Orbit"
+> 
+> Built directly on top of survival_policy_v11.py (Mean: 864.7):
+> 1. Keeps exact v11 reproduction threshold (energy >= 185, age >= 10).
+> 2. Increases weighted predator escape gain slightly to evade tight clusters.
+> 3. Extends tree foraging trigger for old agents (age > 50s instead of 60s) to proactively counter increasing energy decay.
+> 4. Preserves smooth sine wave wandering and wall deflection.
+
+=== v22 ===
+> """
+> survival_policy_v22.py — "v11 Champion + Multi-Predator Dynamic Weighting"
+> 
+> Refining the v11 champion:
+> 1. Dynamic escape vector scaling based on nearest predator proximity.
+> 2. Sprint threshold tuned precisely to 55.0 units with low-energy guardrail.
+> 3. Reproduction threshold at exact v11 standard (185 energy, age >= 10).
+> """
+
+=== v23 ===
+> """
+> survival_policy_v23.py — "v11 Champion + Adaptive Offspring Trait Harnessing"
+> 
+> Key additions over v11:
+> - Inspect agent speed & sprint_speed traits: faster offspring can sprint safely at larger distances (up to dist <= 65 for speed > 15).
+> - Low-energy sprint cutoff: disable sprint when energy < 25 (saves agent from self-starvation).
+> - Tree foraging approach angle dynamic offset: use golden ratio phase spacing per agent ID to distribute agents around trees.
+> """
+
+=== v24 ===
+> """
+> survival_policy_v24.py — "v11 Champion + Precise Micro-Tuning"
+> 
+> Refining the v11 champion baseline:
+> - Reproduction: Keep energy >= 185.0 and age >= 10.0 (unaltered).
+> - Predator Avoidance: 6000.0 / (dist^2 + 1) weighting, sprint at <= 55.0 units when energy > 20.0 (unaltered).
+> - Exploration: Tune turn_angle during wandering to 0.025 * sin(age * 0.06 + phase) for even smoother straight-line foraging.
+> """
+
+=== v25 ===
+> """
+> survival_policy_v25.py — "Full 3000s Survival Strategy: Evolutionary Trait Selection & Conservative Energy Management"
+> 
+> Target: Beat ~2096 leaderboard score (survive all 3000 seconds).
+> 
+> Key Innovations:
+> 1. SELECTIVE MUTATION HARNESSING:
+>    - Prioritize breeding from high-speed, high-vision, and high-energy agents.
+
+=== v26 ===
+> """
+> survival_policy_v26.py — "v11 Champion + Late-Game Defensive Consolidation"
+> 
+> Strategy:
+> - Maintain exact v11 baseline logic (185.0 spawn energy, 6000.0 escape weight, 55.0 sprint dist).
+> - ADAPTIVE LATE-GAME SPRINTING: When simulation time / age advances and predator density increases, increase sprint trigger to 65.0 units so agents start fleeing earlier before predators close in.
+> - TREE-ORBITING FOOD RESERVE: When energy < 50%, increase speed slightly when approaching trees.
+> """
+
+=== v27 ===
+> """
+> survival_policy_v27.py — "v11 Champion + Pure Fine-Tuned Energy Reserve & Wall Repulsion"
+> 
+> Based strictly on v11:
+> - Spawning: Keep 185.0 energy threshold & age >= 10.0 (unaltered).
+> - Fleeing: Keep 6000.0 / (dist^2 + 1) weighting & 55.0 sprint trigger (unaltered).
+> - Wall deflection: Fine-tune edge buffer from 35.0 to 32.0 units to maximize usable map area while preventing corner trapping.
+> - Wandering: Keep exact sinusoidal parameters.
+
+=== v28 ===
+> """
+> survival_policy_v28.py — "v7 Dynamic Balance Architecture"
+> 
+> Combining the best features of v7 (which scored ~749 on remote validation) and v11:
+> 1. Spawning: energy >= 190.0, age >= 12.0 (v7 safe parent energy reserve).
+> 2. Predator escape weighting: 5000.0 / (dist^2 + 1) (v7 proven weighting).
+> 3. Tree foraging: trigger at energy_ratio < 0.82 (v7 threshold).
+> 4. Edge avoidance: 35.0 radius deflection.
+
+=== v29 ===
+> """
+> survival_policy_v29.py — "High-Reserve Conservatism & Predator Facing Flee"
+> 
+> Key Changes to beat 1000+ score:
+> 1. SAFE REPRODUCTION RESERVE: Require energy >= 210.0 and age >= 15.0!
+>    Spawning costs 100 energy. At 210, the parent retains 110 energy post-spawn, eliminating post-reproduction parent starvation completely.
+> 2. SPRINT GUARDRAIL: Only sprint if energy > 40.0. When below 40 energy, agents WALK (speed 10) to avoid collapsing to zero energy while fleeing.
+> 3. EDGE REPULSION: Increase wall deflection distance to 45.0 units to prevent agents from ever getting cornered near map boundaries.
+
+=== v30 ===
+> """
+> survival_policy_v30.py — "v11 Champion + Multi-Agent Group Dispersal"
+> 
+> Key Enhancement over v11:
+> - Add multi-agent mutual repulsion vector: when sibling agents are within 40 units of each other, apply gentle repulsion.
+> - Disperses agents across different trees/fruits rather than clumping together, reducing predator multi-kill probability.
+> """
+> 
+
+=== v31 ===
+> """
+> survival_policy_v31.py — "v11 Champion + Speed-Aware Flee & Fruit Sprint Catch-Up"
+> 
+> Features:
+> 1. Exact v11 baseline parameters (185.0 spawn energy, 6000.0 flee weight, 35.0 edge deflection).
+> 2. FRUIT SPRINT CATCH-UP: When energy > 70% and a fruit is visible at distance > 80 units, sprint toward it for 1 step to harvest fast before it rots or other agents take it.
+> 3. INHERITED SPEED UTILIZATION: Use inherited agent.speed for precise movement scaling.
+> """
+
+=== v32 ===
+> """
+> survival_policy_v32.py — "v11 Champion + Fine-Tuned Wall Buffer & Adaptive Sprint Radius"
+> 
+> Refining the v11 champion:
+> 1. Spawning: Keep exact energy >= 185.0 and age >= 10.0 (unaltered).
+> 2. Fleeing: Keep 6000.0 / (dist^2 + 1) weighting.
+> 3. Edge Deflection: Fine-tune buffer from 35.0 to 36.5 units.
+> 4. Sprinting: Sprint when predator <= 55.0 OR (predator <= 65.0 and len(predators) >= 2 and energy > 35.0).
+
+=== v33 ===
+> """
+> survival_policy_v33.py — "v11 Champion + Pure Vision Horizon & Tight Turn Bounds"
+> 
+> Refining v11:
+> - Keep 185.0 energy spawn threshold & age >= 10.0 (unaltered).
+> - Keep 6000.0 flee weight & 55.0 sprint trigger (unaltered).
+> - Tighten predator fleeing turn angle bound from max(-0.15, min(0.15, pred_angle)) to max(-0.08, min(0.08, pred_angle)) to prevent trajectory oscillation during high-speed evasion.
+> """
+
+=== v34 ===
+> """
+> survival_policy_v34.py — "v11 Champion + Phase-Shifted Wandering Frequencies"
+> 
+> Refining the v11 champion:
+> - Spawning: Keep exact energy >= 185.0 and age >= 10.0 (unaltered).
+> - Fleeing: Keep 6000.0 flee weight, 55.0 sprint trigger, max 0.15 turn (unaltered).
+> - Wandering: Introduce agent-specific frequency modulations to ensure agents explore distinct sectors of the map when searching for fruit/trees:
+>     slow_wave = math.sin(age * (0.050 + (agent_id % 5) * 0.003) + phase)
+
+=== v35 ===
+> """
+> survival_policy_v35.py — "v11 Champion + Trait-Dependent Dynamic Velocity & Energy Ratio Guardrail"
+> 
+> Refining the v11 champion:
+> 1. Spawning: Keep exact energy >= 185.0 and age >= 10.0 (unaltered).
+> 2. Fleeing: Keep 6000.0 flee weight and 35.0 edge deflection (unaltered).
+> 3. SPEED UTILIZATION: Scale move_distance dynamically according to agent's mutated `speed` (up to 20 units/s) instead of hardcoding nominal speed values.
+> 4. LOW-ENERGY CONSERVATION: When energy_ratio < 0.20, limit fleeing distance to 0.7 * speed if predator is > 35 units away, preventing exhaustion right before reaching safety.
+
+=== v36 ===
+> """
+> survival_policy_v36.py — "Ultra-Conservative Energy Management + Hard Sprint Floor"
+> 
+> Key insight: On server runs, score was only 588 vs local 917. The gap likely comes from:
+> 1. ENERGY STARVATION: Agents sprint too much when predator is moderately far away, draining energy until they collapse.
+> 2. LATE GAME: As predators multiply (t > 1000s), agents continuously flee and never recover energy.
+> 
+> Fix:
+
+=== v37 ===
+> """
+> survival_policy_v37.py — "Predator Awareness via rel_dir + Strategic Flee Direction"
+> 
+> Key NEW insight: each predator observation includes a 'rel_dir' field.
+>   rel_dir = (arctan2(agent.y - pred.y, agent.x - pred.x) - predator.direction)
+>   = how much the predator is FACING toward us (in predator's local frame).
+>   - rel_dir ≈ 0: predator is looking directly at us (dangerous)
+>   - |rel_dir| ≈ pi: predator is facing away from us (we are behind predator)
+
+=== v38 ===
+> """
+> survival_policy_v38.py — "Aggressive Breeding + Speed Evolution Strategy"
+> 
+> Core hypothesis: The ONLY way to survive 2000+ seconds with many predators
+> is to evolve agents with very high sprint_speed (up to cap 40).
+> Children inherit parent's traits with 10% chance of +/-50% mutation per trait.
+> So each generation has a 10% chance of a faster child.
+> 
+
+=== v39 ===
+> """
+> survival_policy_v39.py — "Fruit Sprint Harvester + Population Engine"
+> 
+> Key observation: score = time_survived + SUM(fruit.energy/1000 per eaten fruit)
+> If max time = 3000s, a team scoring 2096 must ALSO be getting fruit bonuses.
+> At 60 max energy per fruit, each fruit = 0.06 points. To get 96 extra points
+> from fruit (on top of 2000s survival), need 96/0.06 = 1600 fruits eaten.
+> With 10 agents eating 1 fruit every 10s = 1600 fruits in 1600s. Possible!
+
+=== v40 ===
+> """
+> survival_policy_v40.py — "Lateral Dodge + Energy-Tiered Sprint"
+> 
+> Critical insight from predator.py:
+> - Predator CHARGES (speed 15) when abs(agent_looking_dir) > pi/2 (predator behind us)
+> - Predator PIVOTS (speed ~10.6 net) when abs(agent_looking_dir) < pi/2 (we face it)
+> 
+> So the worst case: predator is RIGHT BEHIND US. 
+
+=== v41 ===
+> """
+> survival_policy_v41.py — "Multi-Predator Zoning: Flee from Nearest, Check Rear"
+> 
+> When multiple predators are present, our current weighted escape vector is:
+>  SUM(escape_weight_i / dist_i^2). This averages all predators equally.
+> 
+> Problem: If 3 predators are all to the left and 1 predator is to the right (nearest),
+> the weighted vector pulls LEFT (toward the cluster of 3), which is WRONG.
+
+=== v42 ===
+> """
+> survival_policy_v42.py — "Potential Field Navigation (PFN)"
+> 
+> Instead of rule-based priority, use a unified potential field:
+> - Predators create REPULSIVE fields (push agent away)
+> - Fruit creates ATTRACTIVE fields (pull agent toward)
+> - Trees create weak ATTRACTIVE fields (guide toward fruit sources)
+> - Walls create REPULSIVE fields (prevent corners)
+
+=== v43 ===
+> """
+> survival_policy_v43.py — "v11 Champion Core + Dynamic Sprint Floor (40u-65u scaling)"
+> 
+> v11 remains the undefeated champion across all experiments (mean ~822-917).
+> Rather than tearing down v11's core architecture, v43 applies micro-optimizations:
+> 
+> 1. Dynamic Sprint Floor based on Energy & Predator Count:
+>    - Base sprint trigger dist: 55u
+
+=== v44 ===
+> """
+> survival_policy_v44.py — "v11 Champion + Pure Trait Inheritance Guard"
+> 
+> Hypothesis: In late game (t > 800s), predator density grows high.
+> v11 parents reproduce at energy >= 185, but if the offspring happens to inherit
+> mutations that drop its max_energy or speed significantly, that child dies quickly
+> and wastes the 100 energy spent spawning it.
+> 
+
+=== v45 ===
+> """
+> survival_policy_v45.py — "v44 Base + Late-Game Age-Compensated Spawn Reserve"
+> 
+> v44 scored 898.485 (very close to v11's 917.593).
+> 
+> Analysis of aging mechanic:
+> - As agents grow older (age > 60), their passive living drain compounds by 0.01 * age per tick.
+> - Older parent agents that spawn at energy=185 have only 85 energy remaining, but their passive energy drain is high. They starve soon after spawning.
+
+=== v46 ===
+> """
+> survival_policy_v46.py — "v11 Champion Core + High-Yield Tree Cluster Attraction"
+> 
+> Analysis:
+> In v11, when an agent sees a tree and energy_ratio < 0.85, it approaches the tree
+> at offset 0.35 rad.
+> However, trees with higher age (age >= 20) spawn fruits at regular intervals.
+> Also, trees in clusters provide better fruit harvesting yield.
+
+=== v47 ===
+> """
+> survival_policy_v47.py — "v44 Champion Refinement: Hybrid Density Guard + Smooth Edge Deflection"
+> 
+> Top 3 Policies So Far:
+> 1. v11: Mean 917.593 (10-seed), 822.258 (20-seed broad)
+> 2. v44: Mean 898.485 (10-seed) — Introduced Predator-Density Spawn Guard
+> 3. v22: Mean 887.829 (10-seed) — Multi-Predator escape weight 10,000
+> 
+
+=== v48 ===
+> """
+> survival_policy_v48.py — "v11 Champion Base + Predator Line-of-Sight Choke Escape"
+> 
+> Analysis:
+> In predator.py, a predator CHARGES at sprint speed (15) when:
+>   abs(agent_looking_dir) > pi/2 OR distance < hearing_radius * 1.5 (60 * 1.5 = 90u)
+> 
+> Where agent_looking_dir from predator frame is the agent's predator["angle"] observation!
+
+=== v49 ===
+> """
+> survival_policy_v49.py — "v11 Champion + Pure Trait Inheritance & Micro-Offset"
+> 
+> Combining v11 baseline with v44 spawn guard and v48 tangential offset.
+> - Pure v11 movement, fruit harvesting, tree foraging, and sine wave wandering.
+> - Sprint threshold = 55.0u (v11 champion standard).
+> - Micro tangential offset (0.15 rad ≈ 8.5 deg) at 45-70u to induce predator pivot.
+> - Spawn threshold = 185.0u (v11 champion standard).
+
+=== v50 ===
+> """
+> survival_policy_v50.py — "v11 Champion Base + Age-Threshold Foraging Trigger"
+> 
+> Analysis of score breakdown in v11 & top performers:
+> - Score = total_dt + sum(fruit.energy / 1000)
+> - In v11, trees are searched when energy_ratio < 0.85 OR age > 60.0.
+> - But trees start spawning fruits when tree age >= 20s.
+> - In late game (t > 500s), age of living agents is high, so ALL agents move toward trees.
+
+=== v51 ===
+> 
+> AGENT_PREDATOR_HISTORY: dict[int, list[tuple[float, float]]] = {}
+> 
+> 
+> def predict_predator_positions(agent_id: int, predators: list[dict]) -> list[dict]:
+>     """
+>     Mechanism 1: Predictive Predator Avoidance (trajectory extrapolation).
+>     Converts relative polar coords to relative Cartesian coords, estimates relative velocity
+
