@@ -12,7 +12,7 @@ from dtos import (
     RequestedViewDto,
 )
 from utils import clip_bbox_to_frame, decode_view, view_bbox_to_global
-from drone_detector_v1 import detect_objects
+from drone_detector_v2 import detect_objects
 
 logger = logging.getLogger(__name__)
 
