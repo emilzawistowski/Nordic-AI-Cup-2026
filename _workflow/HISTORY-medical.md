@@ -160,3 +160,21 @@ granularity is the regularizer — F1-argmax over word windows collapses to
 tiny high-precision windows while gold ≈ 2 sentences. Any future boundary
 work must keep candidates at sentence edges (select only start/end
 sentences, or expand-only), never free word windows.
+
+## Attempt 7 (2026-09-19) — two-stage sentence-level refinement (v3/v5) — REVERTED, score 0.671
+| # | Date | Score | Accuracy | tIoU | What changed |
+|---|------|-------|----------|------|--------------|
+| 7 | 2026-09-19 | 0.671 | 0.967 | 0.474 | Call 2: batched LLM minimal contiguous sentence subset per YES (`medical_reasoner_v3.py`); pure sentence-range lookup, no shrink/shift (`medical_evidence_v5.py`); served via `api_v5.py:9057` |
+
+HTTP end-to-end (local_evaluator.py --url, 39 convs, 0 failed, 0 timeouts,
+10883 ms mean / 20204 ms worst per conv — extra LLM call costs ~1.8s/conv,
+still 34% of budget): 377/390 correct (answers from call 1 only, accuracy
+unchanged as designed); call-2 parse failures 0, range fallbacks 0,
+call-2 failures 0, invalid IDs 0 — the machinery worked perfectly, yet
+tIoU fell 0.539 -> 0.474 (-0.065). Score 0.671 < 0.710 gate -> all
+v3/v5/api_v5 files removed, production v4 untouched. Learning: the LLM
+over-trims when asked for "minimal" (single sentences where gold is ~2)
+and v5 dropped the +0.3s start shift — geometry calibration belongs
+outside the LLM (attempt-3 lesson, confirmed twice now). Note: trim rate
+was not instrumented (only fallbacks logged) — next LLM-geometry attempt
+must log kept-vs-trimmed sentence counts.
