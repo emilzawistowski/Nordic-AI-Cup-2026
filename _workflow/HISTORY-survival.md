@@ -10,7 +10,7 @@ Key: survive first, eat fruit second.
 - **Leaderboard #1 Score**: 2096.489
 
 ## Active policy: survival_policy_v11.py (imported by agent_server.py)
-Latest experimental: survival_policy_v50.py (NOT yet benchmarked or deployed)
+Latest experimental: survival_policy_v51.py (benchmarked, recorded experiment)
 
 ## Attempt log
 | # | Date | Online/Bench Score | Policy | What changed |
@@ -18,6 +18,7 @@ Latest experimental: survival_policy_v50.py (NOT yet benchmarked or deployed)
 | 0 | 2026-09-17 | - | baseline | Original |
 | 1 | 2026-09-18 | 749.842 | v11 | Active in server (Current best online score) |
 | ... | 2026-09-18/19 | - | v12-v50 | Parameter tuning, clustering prevention |
+| 51 | 2026-09-19 | 795.812 | v51 | Predictive predator avoidance + zone-based tree allocation + reproduction cutoff skipped (missing sim_time in ObservationResponse) |
 
 ## v11 known behavior
 - Predator avoidance: weighted escape, sprint threshold 55 units
@@ -29,6 +30,12 @@ Latest experimental: survival_policy_v50.py (NOT yet benchmarked or deployed)
 ## v50 changes (untested)
 - Tree forage threshold: energy_ratio < 0.70 (was 0.85) AND age > 90 (was 60)
 - Goal: reduce tree clustering → reduce predator kills
+
+## v51 known behavior
+- Predictive predator avoidance: trajectory extrapolation 1.5 ticks ahead via relative velocity vector estimated from consecutive ticks; sprint threshold 55 units retained
+- Zone-based tree allocation: deterministic tree assignment (`agent_id % len(trees)`) when multiple trees are visible to prevent clustering
+- Time-aware reproduction cutoff: skipped because `ObservationResponse` / `observation_response` dict does not expose simulation time
+- Benchmark result: 795.812 mean score across 10 default seeds (vs 898.485 for v11 on the same seed set; did not beat v11, agent_server remains on v11)
 
 ## Dead ends (v3–v50)
 - Aggressive early spawning → starvation
