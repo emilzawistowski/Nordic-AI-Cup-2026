@@ -98,3 +98,8 @@ LLM with a question-anchored sentence-run shrink, not with prompt pleading.
   vary 3–7.
 - Final local_evaluator.py output: see benchmark row above (direct-predict
   harness, same 0.4/0.6 weights); HTTP end-to-end run pending/appended below.
+
+### Final end-to-end verification (local_evaluator.py over HTTP, 2026-09-19)
+`Accuracy: 0.974, Mean tIoU: 0.487, Score: 0.682` (380/390, 0 failed, 0
+timeouts; per conversation 10915 ms mean, 17826 ms worst — 30% of the 60s
+budget; prompt's 25s/45s requirement holds). Matches benchmark.py exactly.
