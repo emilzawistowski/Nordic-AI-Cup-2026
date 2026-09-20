@@ -223,3 +223,41 @@ experiments/ft1_run.log, ft1_maxlen.txt, ft1_sit.txt. Production v4 untouched.
 Learning (one line): supervision for one pass improves answer accuracy but
 degrades span selection — the span convention needs more than imitated
 oracle IDs at this data scale.
+
+## Attempt 10 (2026-09-20) — MBR/majority-vote fusion over 5 sampled runs — REJECTED (offline gate 0/5)
+| # | Date | Pooled OOS (39 convs / 390 q, 5-fold nested CV) | Verdict |
+|---|------|------------------------------------------------|---------|
+| 10 | 2026-09-20 | v4 base (from cache): acc 0.9667 / tIoU 0.5386 / score 0.7098; MBR t=2 and t=3 identical: 0.9667 / 0.5375 / 0.7092 (d_tIoU -0.0011) | REJECTED |
+
+Recipe: SAME numbered transcript + SAME indexed prompt, 5x via
+`answer_questions_batch_indexed_sampled` (make_sampler temp=0.7, top_p=0.9,
+top_k default; seeds 101-105 via mx.random.seed); fuse = YES iff votes >=
+threshold, medoid ID set by mean Jaccard (no union); UNCHANGED
+calibrate_indexed_span via medical_evidence_v6 pass-through. Fold split =
+exact attempt-9 split (imported experiments/ft1_common.folds, NOT
+splits.json — the two differ; choice documented). Baseline re-run from
+experiments/cache_v6.json on the identical 39-conv set (pooled tIoU 0.5386 =
+attempt-8 faithfulness value ✓ comparable). Cache: experiments/e6_cache/
+(39 convs x 5 runs, raw + parsed, 756K, committed); wall clock ~8 min MLX +
+seconds CV (budget 3h — passed easily).
+Per-fold (thresh chosen on 4 train folds, train t=2/t=3 scores IDENTICAL
+every fold -> tie-break picked 3):
+- fold_0: base 0.9750/0.6009/0.7506 (fb5 fn1) -> exp identical, d+0.0000 FAIL
+- fold_1: base 0.9750/0.6444/0.7766 -> exp 0.9750/0.6357/0.7714, d_tIoU-0.0087 FAIL
+- fold_2: base 0.9750/0.4920/0.6852 (fb2 fn2) -> exp identical FAIL
+- fold_3: base 0.9375/0.4059/0.6186 -> exp 0.9375/0.4065/0.6189, d+0.0005 FAIL
+- fold_4: base 0.9714/0.5362/0.7103 -> exp 0.9714/0.5396/0.7124, d+0.0035 FAIL
+Gate (d_tIoU>=+0.02, d_acc>=+0.000, d_score>+0 in >=4/5): 0/5 -> REJECTED.
+No online local_evaluator run (gate failed offline); example.py/api.py
+untouched; no promotion. Files kept (none promoted): medical_reasoner_v6.py,
+medical_evidence_v6.py, example_v6.py, api_v6.py (port 9058),
+experiments/{e6_mbr_cv.py, e6_cache/, e6_results.json}.
+Diagnosis: sampling works (31/39 convs show raw-text diversity across seeds)
+but parsed verdicts are near-unanimous — only 4/390 questions non-unanimous,
+ZERO with exactly 2 YES votes — so t=2 and t=3 fuse byte-identically and MBR
+== deterministic single run plus noise (fold_1 lost 0.0087 tIoU on one
+flipped ID set; false-no stuck at 7). The YES/NO + ID prompt at temp 0.7 is
+too constraining to yield decision diversity.
+Learning (one line): temperature sampling perturbs phrasing, not verdicts —
+vote fusion needs a diversity source that actually moves decisions (e.g.
+paraphrased prompts or heterogeneous models), not just a sampler.
