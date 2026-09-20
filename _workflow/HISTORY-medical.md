@@ -261,3 +261,36 @@ too constraining to yield decision diversity.
 Learning (one line): temperature sampling perturbs phrasing, not verdicts —
 vote fusion needs a diversity source that actually moves decisions (e.g.
 paraphrased prompts or heterogeneous models), not just a sampler.
+
+## Attempt 11 (2026-09-20) — cross-encoder fallback repair — REJECTED (offline gate)
+| # | Date | Pooled (39 convs / 390 q, 5-fold, attempt-9 split) | Verdict |
+|---|------|---------------------------------------------------|---------|
+| 11 | 2026-09-20 | v4 base: acc 0.9667 / tIoU 0.5386 / score 0.7098; v7 repair: 0.9667 / 0.5383 / 0.7097 (d_tIoU -0.0003) | REJECTED |
+
+Recipe: v4 F1 shrink runs FIRST (verbatim copy, parity-verified: v7 without
+question_text == v4 on all 194 YES questions); on the F1-fail trigger only,
+pretrained cross-encoder/ms-marco-MiniLM-L-6-v2 (CPU, ~20s load, no fitting)
+scores all contiguous sub-runs of the cited range vs question text, best run
+wins with the same +0.3s shift; best score < CE_MIN_SCORE (-5.0, fixed by
+design) or degenerate geometry -> full range as before. Baseline from
+experiments/cache_v6.json (identical set); only the CE ran fresh.
+Per-fold d_tIoU: fold_0 +0.0002 (5 trig/1 fired/1 better), fold_1 +0.0000
+(5/1/0 better/0 worse), fold_2 +0.0000 (2/0), fold_3 +0.0000 (3/0),
+fold_4 -0.0014 (6/1/0 better/1 worse). Folds non-negative 4/5 ✓; accuracy
+delta exactly +0.0000 ✓ (answers structurally untouched, asserted per fold).
+Gate fails: pooled d_tIoU -0.0003 (need >= +0.010) and repair fired 3/21
+(need >= 15). No HTTP run (gate failed offline); example.py/api.py untouched;
+no promotion; threshold NOT retuned per spec.
+Diagnosis: trigger top-scores range -10.86..+0.62, 18/21 below -5.0 and most
+deeply negative (-6..-11) — the CE genuinely judges these pairs irrelevant,
+not a hairline threshold miss. The fallback cases look like wrong cited
+sentences (disjoint bucket), not synonym mismatch, so no lexical/semantic
+sub-run selector can save them. The 3 fired repairs went 1 better / 1 equal
+/ 1 worse (all run_len 1).
+Files kept (none promoted): medical_evidence_v7.py, medical_reasoner_v7.py
+(pass-through), example_v7.py, api_v7.py (port 9059),
+experiments/{e7_cv.py, e7_results.json}. Wall clock ~10 min total (pip +
+model download + CV), budget 2h passed.
+Learning (one line): the 21 fallbacks are a retrieval problem (wrong cited
+sentences), not a selection problem — fixing them needs better citations
+from the reasoner, not a better sub-run scorer.
